@@ -1,0 +1,24 @@
+---
+- hosts: all
+  become: yes
+  gather_facts: yes
+
+  roles:
+    - role: lpf23.packer_debian
+    - role: lpf23.docker
+      vars:
+        docker_users: 
+          - vagrant
+        docker_daemon_options:
+          experimental: true
+
+  tasks:
+    - apt: 
+        name: '{{ packages }}' 
+        state: present
+      vars:
+        packages:
+        - git
+        - wget
+        - curl
+        - vim

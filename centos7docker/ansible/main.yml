@@ -1,0 +1,13 @@
+---
+- hosts: all
+  become: yes
+  gather_facts: yes
+
+  roles:
+    - role: lpf23.packer_rhel
+    - role: lpf23.docker
+      vars:
+        docker_users: 
+          - vagrant
+        docker_daemon_options:
+          experimental: true
