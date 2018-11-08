@@ -185,20 +185,20 @@
       ],
       "type": "shell"
     },
-  {
-    "type": "ansible-local",
-    "playbook_file": "ansible/main.yml",
-    "galaxy_file": "requirements.yml"
-  },
-  {
-    "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E sh -eux '{{.Path}}'",
-    "expect_disconnect": true,
-    "scripts": [
-      "scripts/cleanup.sh",
-      "../_common/minimize.sh"
-    ],
-    "type": "shell"
-  }
+    {
+      "type": "ansible-local",
+      "playbook_file": "ansible/main.yml",
+      "galaxy_file": "requirements.yml"
+    },
+    {
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E sh -eux '{{.Path}}'",
+      "expect_disconnect": true,
+      "scripts": [
+        "scripts/cleanup.sh",
+        "../_common/minimize.sh"
+      ],
+      "type": "shell"
+    }
   ],
   "variables": {
     "box_basename": "centos-7.5",
