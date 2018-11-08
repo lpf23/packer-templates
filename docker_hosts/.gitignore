@@ -3,14 +3,13 @@
 *.iso
 *.box
 virtualfloppy.vfd
-packer_cache
+centos/packer_cache
 packer.log
 .DS_Store
 /packer-*/
-/packer_cache/
-*.variables.json
 /builds/
 .kitchen
 .kitchen.yml
 Gemfile.lock
 bootstrap.sh
+.idea/
