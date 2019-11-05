@@ -1,9 +1,10 @@
-#!/bin/sh -eux
+#!/bin/bash -eux
 
 case "$PACKER_BUILDER_TYPE" in
   qemu) exit 0 ;;
 esac
 
+echo "==> Reducing box size"
 # Whiteout root
 count=$(df --sync -kP / | tail -n1  | awk -F ' ' '{print $4}')
 count=$(($count-1))
@@ -25,8 +26,7 @@ esac
 set -e
 
 if [ "x${swapuuid}" != "x" ]; then
-    # Whiteout the swap partition to reduce box size
-    # Swap is disabled till reboot
+    # Whiteout the swap partition to reduce box size; disable until reboot
     swappart="`readlink -f /dev/disk/by-uuid/$swapuuid`";
     /sbin/swapoff "$swappart";
     dd if=/dev/zero of="$swappart" bs=1M || echo "dd exit code $? is suppressed";

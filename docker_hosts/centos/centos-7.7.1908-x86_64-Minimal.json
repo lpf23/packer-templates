@@ -1,0 +1,188 @@
+{
+  "builders": [
+    {
+      "boot_command": [
+        "<up><wait><tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/{{user `kickstart`}}<enter><wait>"
+      ],
+      "boot_wait": "10s",
+      "disk_size": "{{user `disk_size` }}",
+      "guest_additions_url": "{{ user `guest_additions_url` }}",
+      "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+      "guest_os_type": "{{ user `virtualbox_guest_os_type` }}",
+      "hard_drive_interface": "sata",
+      "headless": "{{ user `headless` }}",
+      "http_directory": "{{ user `http_directory` }}",
+      "iso_checksum": "{{user `iso_checksum`}}",
+      "iso_checksum_type": "{{user `iso_checksum_type`}}",
+      "iso_urls": [
+        "{{ user `iso_name` }}",
+        "{{ user `iso_path` }}/{{ user `iso_name` }}",
+        "{{ user `iso_url` }}"
+      ],
+      "output_directory": "../builds/packer-{{user `box_basename`}}-virtualbox",
+      "shutdown_command": "{{ user `shutdown_command` }}",
+      "ssh_password": "{{ user `ssh_password` }}",
+      "ssh_username": "{{ user `ssh_username` }}",
+      "ssh_wait_timeout": "10000s",
+      "type": "virtualbox-iso",
+      "vboxmanage": [
+        [
+          "modifyvm", "{{.Name}}", "--memory", "{{ user `memory` }}"
+        ],
+        [
+          "modifyvm", "{{.Name}}", "--cpus", "{{ user `cpus` }}"
+        ],
+        [
+          "modifyvm", "{{.Name}}", "--paravirtprovider", "{{ user `virtualbox_paravirtprovider` }}"
+        ],
+        [
+          "modifyvm", "{{.Name}}", "--nictype1", "{{ user `virtualbox_nictype` }}"
+        ]
+      ],
+      "virtualbox_version_file": ".vbox_version",
+      "vm_name": "{{ user `vm_name` }}"
+    },
+    {
+      "boot_command": [
+        "<wait5><tab> text ks=hd:fd0:/ks.cfg<enter><wait5><esc>"
+      ],
+      "boot_wait": "10s",
+      "cpu": "{{ user `cpus` }}",
+      "disk_size": "{{user `disk_size`}}",
+      "floppy_files": [
+        "http/7/ks.cfg"
+      ],
+      "generation": "{{user `hyperv_generation`}}",
+      "guest_additions_mode": "disable",
+      "http_directory": "http",
+      "iso_checksum": "{{user `iso_checksum`}}",
+      "iso_checksum_type": "{{user `iso_checksum_type`}}",
+      "iso_urls": [
+        "{{ user `iso_name` }}",
+        "{{ user `iso_path` }}/{{ user `iso_name` }}",
+        "{{ user `iso_url` }}"
+      ],
+      "output_directory": "../builds/packer-{{user `box_basename`}}-hyperv",
+      "ram_size": "{{ user `memory` }}",
+      "shutdown_command": "echo 'vagrant' | sudo -S /sbin/halt -h -p",
+      "ssh_password": "vagrant",
+      "ssh_port": 22,
+      "ssh_timeout": "10000s",
+      "ssh_username": "vagrant",
+      "switch_name": "{{ user `hyperv_switch`}}",
+      "switch_vlan_id": "{{user `switch_vlan_id`}}",
+      "type": "hyperv-iso",
+      "vm_name": "{{ user `vm_name` }}"
+    }
+  ],
+  "post-processors": [
+    {
+      "keep_input_artifact": false,
+      "output": "../builds/{{user `box_basename` }}.{{.Provider}}.box",
+      "type": "vagrant",
+      "vagrantfile_template": "{{ user `vagrantfile_template` }}"
+    }
+  ],
+  "provisioners": [
+    {
+      "environment_vars": [
+        "HOME_DIR=/home/vagrant",
+        "CLEANUP_BUILD_TOOLS={{user `cleanup_build_tools` }}",
+        "DESKTOP={{user `desktop` }}",
+        "UPDATE={{user `update` }}",
+        "INSTALL_VAGRANT_KEY={{user `install_vagrant_key` }}",
+        "SSH_USERNAME={{user `ssh_username` }}",
+        "SSH_PASSWORD={{user `ssh_password` }}",
+        "http_proxy={{user `http_proxy` }}",
+        "https_proxy={{user `https_proxy` }}",
+        "ftp_proxy={{user `ftp_proxy` }}",
+        "rsync_proxy={{user `rsync_proxy` }}",
+        "no_proxy={{user `no_proxy` }}"
+      ],
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash -eux '{{.Path}}'",
+      "scripts": [
+        "scripts/update.sh",
+        "../_common/sshd.sh",
+        "scripts/networking.sh",
+        "scripts/tools.sh",
+        "../_common/vagrant.sh",
+        "../_common/virtualbox.sh"
+      ],
+      "type": "shell",
+      "expect_disconnect": true
+    },
+    {
+      "type": "ansible-local",
+      "playbook_file": "ansible/main.yml",
+      "galaxy_file": "requirements.yml"
+    },
+    {
+      "environment_vars": [
+        "HOME_DIR=/home/vagrant",
+        "CLEANUP_BUILD_TOOLS={{user `cleanup_build_tools` }}",
+        "DESKTOP={{user `desktop` }}",
+        "UPDATE={{user `update` }}",
+        "INSTALL_VAGRANT_KEY={{user `install_vagrant_key` }}",
+        "SSH_USERNAME={{user `ssh_username` }}",
+        "SSH_PASSWORD={{user `ssh_password` }}",
+        "http_proxy={{user `http_proxy` }}",
+        "https_proxy={{user `https_proxy` }}",
+        "ftp_proxy={{user `ftp_proxy` }}",
+        "rsync_proxy={{user `rsync_proxy` }}",
+        "no_proxy={{user `no_proxy` }}"
+      ],
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -S -E bash -eux '{{.Path}}'",
+
+      "scripts": [
+        "scripts/motd.sh",
+        "scripts/cleanup.sh",
+        "../_common/minimize.sh"
+      ],
+      "type": "shell",
+      "expect_disconnect": true,
+      "pause_before": "5s"
+    }
+  ],
+  "variables": {
+    "update": "true",
+    "cleanup_build_tools": "true",
+
+    "http_directory": "http/7",
+    "kickstart": "ks.cfg",
+
+    "ssh_password": "vagrant",
+    "ssh_username": "vagrant",
+
+    "iso_checksum": "9a2c47d97b9975452f7d582264e9fc16d108ed8252ac6816239a3b58cef5c53d",
+    "iso_checksum_type": "sha256",
+    "iso_name": "CentOS-7-x86_64-Minimal-1908.iso",
+    "iso_path": "",
+    "iso_url": "http://mirrors.kernel.org/centos/7.7.1908/isos/x86_64/CentOS-7-x86_64-Minimal-1908.iso",
+
+    "cpus": "2",
+    "disk_size": "65536",
+    "memory": "2048",
+    "headless": "true",
+    "desktop": "false",
+    "virtualbox_guest_os_type": "RedHat_64",
+    "virtualbox_paravirtprovider": "default",
+    "virtualbox_nictype": "virtio",
+
+    "box_basename": "centos-7.7.1908",
+    "build_timestamp": "{{isotime \"20060102150405\"}}",
+    "vm_name": "centos7docker",
+    "vagrantfile_template": "",
+    "version": "TIMESTAMP",
+    "git_revision": "__unknown_git_revision__",
+    "shutdown_command": "echo 'vagrant'|sudo -S shutdown -P now",
+
+    "hyperv_generation": "1",
+    "hyperv_switch": "packer-hyperv-iso",
+    "switch_vlan_id": "",
+    "vmware_guest_os_type": "centos-64",
+    "http_proxy": "{{env `http_proxy` }}",
+    "https_proxy": "{{env `https_proxy` }}",
+    "no_proxy": "{{env `no_proxy` }}",
+    "rsync_proxy": "{{env `rsync_proxy` }}"
+  }
+}

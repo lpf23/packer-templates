@@ -1,4 +1,4 @@
-#!/bin/sh -eux
+#!/bin/bash -eux
 
 # set a default HOME_DIR environment variable if not set
 HOME_DIR="${HOME_DIR:-/home/vagrant}";
@@ -12,7 +12,7 @@ elif command -v curl >/dev/null 2>&1; then
 elif command -v fetch >/dev/null 2>&1; then
     fetch -am -o $HOME_DIR/.ssh/authorized_keys "$pubkey_url";
 else
-    echo "Cannot download vagrant public key";
+    echo "==> Cannot download vagrant public key";
     exit 1;
 fi
 chown -R vagrant $HOME_DIR/.ssh;

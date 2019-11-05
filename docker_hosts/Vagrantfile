@@ -5,7 +5,7 @@ Vagrant.configure("2") do |config|
 
   # VirtualBox.
   config.vm.define "virtualbox" do |virtualbox|
-    virtualbox.vm.box = "file://builds/virtualbox-centos7.box"
+    virtualbox.vm.box = "file://builds/centos-7.7.1908.virtualbox.box"
     virtualbox.vm.hostname = "centos7docker"
     virtualbox.vm.synced_folder '.', '/vagrant'
     virtualbox.vm.network :private_network, ip: "172.16.3.2"
